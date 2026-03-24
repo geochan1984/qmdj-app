@@ -7,10 +7,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-qmdj-manus-test-key-2
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    h.strip() for h in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if h.strip()
+    h.strip() for h in os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://*.koyeb.app,https://*.onrender.com').split(',') if h.strip()
 ]
 
 INSTALLED_APPS = [
@@ -54,7 +54,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'qmdj_project.wsgi.application'
 
-# 數據庫：優先使用 DATABASE_URL（Railway PostgreSQL），否則使用 SQLite
+# 數據庫：優先使用 DATABASE_URL（PostgreSQL），否則使用 SQLite
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 if DATABASE_URL:
     import dj_database_url
@@ -65,7 +65,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': '/tmp/db.sqlite3',
         }
     }
 
@@ -83,7 +83,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/tmp/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
