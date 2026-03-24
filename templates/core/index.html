@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+{% block title %}奇門遁甲問事系統 - 首頁{% endblock %}
+{% block content %}
+
+<div style="text-align:center;padding:60px 20px 40px;">
+  <div style="font-size:4rem;margin-bottom:16px;">🔮</div>
+  <h1 style="font-size:2.5rem;color:var(--gold);margin-bottom:12px;">奇門遁甲問事系統</h1>
+  <p style="font-size:1.1rem;color:var(--text-muted);max-width:600px;margin:0 auto 32px;">
+    運用古老的奇門遁甲術數，結合地方真太陽時精確起局，配合 AI 智能分析，為您的事業、財運、感情提供專業指引。
+  </p>
+  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="{% url 'register' %}" class="btn btn-gold" style="font-size:1.1rem;padding:14px 36px;">免費開始問事</a>
+    <a href="{% url 'login' %}" class="btn btn-outline" style="font-size:1.1rem;padding:14px 36px;">已有帳號登入</a>
+  </div>
+</div>
+
+<!-- 功能介紹 -->
+<div class="grid-3" style="margin-bottom:40px;">
+  <div class="card" style="text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">⏰</div>
+    <h3 style="color:var(--gold);margin-bottom:8px;">地方真太陽時</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;">精確計算15個城市的地方真太陽時，確保起局準確無誤</p>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🏛️</div>
+    <h3 style="color:var(--gold);margin-bottom:8px;">九宮格可視化</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;">清晰展示八門、九星、八神的宮位分佈，格局一目了然</p>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🤖</div>
+    <h3 style="color:var(--gold);margin-bottom:8px;">AI 智能分析</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;">結合歷史案例庫，提供針對性的盤面解讀與行動建議</p>
+  </div>
+</div>
+
+<!-- VIP 介紹 -->
+<div class="card" style="background:linear-gradient(135deg,rgba(107,33,168,0.3),rgba(45,27,94,0.5));border-color:var(--gold);">
+  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;">
+      <h2 style="color:var(--gold);margin-bottom:8px;">👑 VIP 會員系統</h2>
+      <p style="color:var(--text-muted);margin-bottom:16px;">限額100位 VIP 會員，享有專屬問事服務。每次問事後需提交反饋，幫助系統持續優化準確度。</p>
+      <a href="{% url 'register' %}" class="btn btn-gold">申請 VIP 資格</a>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:3rem;">🔐</div>
+      <p style="color:var(--gold);font-size:0.85rem;">WhatsApp 驗證</p>
+    </div>
+  </div>
+</div>
+
+<!-- 歷史案例展示 -->
+{% if historical_cases %}
+<div class="section-title" style="margin-top:40px;">精選歷史案例</div>
+<div class="grid-2">
+  {% for case in historical_cases %}
+  <div class="card" style="padding:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <h4 style="color:var(--text);font-size:0.95rem;">{{ case.title }}</h4>
+      <span class="badge badge-muted">{{ case.get_category_display }}</span>
+    </div>
+    {% if case.key_config %}
+    <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">
+      <span style="color:var(--gold);">格局：</span>{{ case.key_config|truncatechars:60 }}
+    </p>
+    {% endif %}
+    {% if case.real_feedback %}
+    <p style="color:var(--text-muted);font-size:0.8rem;">
+      <span style="color:var(--success);">驗證：</span>{{ case.real_feedback|truncatechars:80 }}
+    </p>
+    {% endif %}
+    <div style="margin-top:10px;">
+      <a href="{% url 'login' %}" class="btn btn-outline btn-sm">查看詳情</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

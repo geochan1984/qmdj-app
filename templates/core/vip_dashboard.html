@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+{% block title %}VIP 儀表板 - 奇門遁甲{% endblock %}
+{% block content %}
+
+<!-- 頂部 VIP 信息 -->
+<div class="card" style="background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(107,33,168,0.3));border-color:var(--gold);margin-bottom:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <span style="font-size:2rem;">👑</span>
+        <div>
+          <h2 style="color:var(--gold);">VIP-{{ vip.vip_number }}</h2>
+          <p style="color:var(--text-muted);font-size:0.85rem;">{{ vip.user.username }}</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <span style="color:var(--text-muted);font-size:0.85rem;">📱 {{ vip.whatsapp_number }}</span>
+        {% if vip.is_verified %}
+          <span class="badge badge-success">✅ 已驗證</span>
+        {% else %}
+          <span class="badge badge-warning">⏳ 待驗證</span>
+        {% endif %}
+        <span style="color:var(--text-muted);font-size:0.85rem;">📅 {{ vip.created_at|date:"Y年m月d日" }}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;text-align:center;">
+      <div>
+        <div style="font-size:2rem;font-weight:bold;color:var(--gold);">{{ total_cases }}</div>
+        <div style="color:var(--text-muted);font-size:0.8rem;">總問事數</div>
+      </div>
+      <div>
+        <div style="font-size:2rem;font-weight:bold;color:{% if pending_count > 0 %}var(--warning){% else %}var(--success){% endif %};">{{ pending_count }}</div>
+        <div style="color:var(--text-muted);font-size:0.8rem;">待反饋</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 操作提示 -->
+{% if not can_create %}
+<div class="card" style="background:rgba(245,158,11,0.1);border-color:var(--warning);margin-bottom:20px;">
+  <p style="color:#fcd34d;">⚠️ {{ cannot_create_reason }}</p>
+  {% if pending_cases %}
+  <div style="margin-top:12px;">
+    {% for case in pending_cases %}
+    <a href="{% url 'case_detail' case.id %}" class="btn btn-outline btn-sm" style="margin-right:8px;">
+      提交「{{ case.title }}」的反饋
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<div style="margin-bottom:20px;">
+  <a href="{% url 'create_case' %}" class="btn btn-gold">＋ 新問事</a>
+</div>
+{% endif %}
+
+<!-- 問事記錄 -->
+<div class="section-title">問事記錄</div>
+{% if user_cases %}
+{% for case in user_cases %}
+<div class="card" style="padding:16px;margin-bottom:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+    <div style="flex:1;">
+      <h3 style="margin-bottom:6px;">
+        <a href="{% url 'case_detail' case.id %}" style="color:var(--text);">{{ case.title }}</a>
+      </h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span class="badge badge-muted">{{ case.get_category_display }}</span>
+        {% if case.city %}<span style="color:var(--text-muted);font-size:0.8rem;">📍 {{ case.city }}</span>{% endif %}
+        <span style="color:var(--text-muted);font-size:0.8rem;">🕐 {{ case.created_at|date:"Y-m-d H:i" }}</span>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      {% if case.feedback_required and not case.feedback_submitted %}
+        <span class="badge badge-warning">待反饋</span>
+      {% elif case.feedback_submitted %}
+        <span class="badge badge-success">已反饋 · {{ case.get_feedback_result_display }}</span>
+      {% else %}
+        <span class="badge badge-muted">無需反饋</span>
+      {% endif %}
+      <br><br>
+      <a href="{% url 'case_detail' case.id %}" class="btn btn-outline btn-sm">查看</a>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="card" style="text-align:center;padding:40px;">
+  <div style="font-size:3rem;margin-bottom:12px;">📋</div>
+  <p style="color:var(--text-muted);">還沒有問事記錄</p>
+  <a href="{% url 'create_case' %}" class="btn btn-gold" style="margin-top:16px;">立即問事</a>
+</div>
+{% endif %}
+
+{% endblock %}

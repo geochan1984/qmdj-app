@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+{% block title %}導入歷史案例 - 奇門遁甲{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto;">
+  <h1 class="section-title">導入歷史案例</h1>
+  <div class="card">
+    <p style="color:var(--text-muted);margin-bottom:20px;">
+      上傳 CSV 文件批量導入歷史案例。CSV 文件需包含以下欄位：<br>
+      <code style="color:var(--gold);">案例編號, 求測類型, 求測人背景, 起局時間, 干支八字, 關鍵局項, 斷語紀錄, 事後反饋, 資料來源</code>
+    </p>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">選擇 CSV 文件</label>
+        <input type="file" name="csv_file" accept=".csv" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-gold">上傳並導入</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

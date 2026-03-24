@@ -1,0 +1,245 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ case.title }} - 奇門遁甲{% endblock %}
+{% block extra_head %}
+<style>
+  /* 九宮格樣式 */
+  .jiugong-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .palace {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .palace:hover { border-color: var(--primary-light); }
+  .palace.zhifu {
+    background: linear-gradient(135deg, rgba(107,33,168,0.4), rgba(45,27,94,0.6));
+    border-color: var(--gold);
+  }
+  .palace.center {
+    background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(45,27,94,0.4));
+  }
+  .palace-gong {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    position: absolute;
+    top: 4px;
+    left: 6px;
+  }
+  .palace-position {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    position: absolute;
+    top: 4px;
+    right: 6px;
+  }
+  .palace-men {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--gold);
+  }
+  .palace-xing {
+    font-size: 0.85rem;
+    color: var(--primary-light);
+  }
+  .palace-shen {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .palace-wuxing {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .men-ji { color: #6ee7b7 !important; }  /* 吉門 */
+  .men-xiong { color: #fca5a5 !important; } /* 凶門 */
+
+  /* 特殊格局 */
+  .config-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    margin: 4px;
+  }
+  .config-warning { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid var(--warning); }
+  .config-danger { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid var(--danger); }
+</style>
+{% endblock %}
+{% block content %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+  <h1 style="color:var(--gold);font-size:1.4rem;">{{ case.title }}</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    {% if not case.is_historical %}
+    <a href="{% url 'case_list' %}" class="btn btn-outline btn-sm">← 返回列表</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 基本信息 -->
+<div class="grid-2" style="margin-bottom:20px;">
+  <div class="card" style="padding:16px;">
+    <div class="card-title">📋 問事信息</div>
+    <table style="width:100%;font-size:0.9rem;border-collapse:collapse;">
+      {% if case.name %}<tr><td style="color:var(--text-muted);padding:4px 0;width:80px;">姓名</td><td>{{ case.name }}</td></tr>{% endif %}
+      {% if case.age %}<tr><td style="color:var(--text-muted);padding:4px 0;">年齡</td><td>{{ case.age }} 歲</td></tr>{% endif %}
+      {% if case.gender %}<tr><td style="color:var(--text-muted);padding:4px 0;">性別</td><td>{{ case.get_gender_display }}</td></tr>{% endif %}
+      {% if case.city %}<tr><td style="color:var(--text-muted);padding:4px 0;">城市</td><td>{{ case.city }}</td></tr>{% endif %}
+      {% if case.sub_type %}<tr><td style="color:var(--text-muted);padding:4px 0;">場景</td><td>{{ case.sub_type }}</td></tr>{% endif %}
+      <tr><td style="color:var(--text-muted);padding:4px 0;">類別</td><td>{{ case.get_category_display }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">問事時間</td><td>{{ case.manual_time|date:"Y-m-d H:i"|default:"當前時間" }}</td></tr>
+    </table>
+    {% if case.question %}
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:4px;">問事問題：</p>
+      <p style="font-size:0.9rem;">{{ case.question }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card" style="padding:16px;">
+    <div class="card-title">📅 干支信息</div>
+    {% if chart_data %}
+    <table style="width:100%;font-size:0.9rem;border-collapse:collapse;">
+      <tr><td style="color:var(--text-muted);padding:4px 0;width:80px;">年干支</td><td style="color:var(--gold);">{{ chart_data.year_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">月干支</td><td style="color:var(--gold);">{{ chart_data.month_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">日干支</td><td style="color:var(--gold);">{{ chart_data.day_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">時干支</td><td style="color:var(--gold);">{{ chart_data.time_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">時辰</td><td>{{ chart_data.shichen }}時</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">局型</td><td><span class="badge badge-gold">{{ chart_data.ju_type }} {{ chart_data.ju_number }}局</span></td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">日干落宮</td><td>{{ chart_data.day_tg }}（{{ chart_data.day_tg_gong }}宮）</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">太陽時</td><td style="font-size:0.8rem;color:var(--text-muted);">{{ chart_data.solar_time }}</td></tr>
+    </table>
+    {% elif case.ganzhi %}
+    <p style="color:var(--gold);">{{ case.ganzhi }}</p>
+    {% endif %}
+
+    <!-- 特殊格局 -->
+    {% if special_configs %}
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:8px;">特殊格局：</p>
+      {% for config in special_configs %}
+      <span class="config-badge config-{{ config.severity }}">⚠️ {{ config.name }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 九宮格 -->
+{% if palaces %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-title">🏛️ 九宮格盤面</div>
+  <div class="jiugong-grid">
+    {% for gong_num in grid_order %}
+    {% with palace=palaces|default_if_none:'' %}
+    {% with p=palaces %}
+    {% for k, v in palaces.items %}
+    {% if k == gong_num %}
+    <div class="palace {% if v.is_zhifu %}zhifu{% endif %} {% if gong_num == 5 %}center{% endif %}">
+      <span class="palace-gong">{{ v.gong_name }}{{ gong_num }}</span>
+      <span class="palace-position">{{ v.position }}</span>
+      <div class="palace-men {% if v.men in '休生開' %}men-ji{% elif v.men in '死驚傷' %}men-xiong{% endif %}">
+        {{ v.men }}門
+      </div>
+      <div class="palace-xing">{{ v.xing }}</div>
+      <div class="palace-shen">{{ v.shen }}</div>
+      <div class="palace-wuxing">{{ v.wuxing }}</div>
+      {% if v.is_zhifu %}<div style="font-size:0.65rem;color:var(--gold);">值符</div>{% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endwith %}
+    {% endwith %}
+    {% endfor %}
+  </div>
+  <div style="margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:0.8rem;color:var(--text-muted);">
+    <span><span style="color:#6ee7b7;">■</span> 吉門（休/生/開）</span>
+    <span><span style="color:#fca5a5;">■</span> 凶門（死/驚/傷）</span>
+    <span><span style="color:var(--gold);">■</span> 值符宮位</span>
+  </div>
+</div>
+{% elif case.key_config %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-title">🔑 關鍵格局</div>
+  <p style="color:var(--text-muted);">{{ case.key_config }}</p>
+</div>
+{% endif %}
+
+<!-- AI 分析 / 大師斷語 -->
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-title">
+    {% if case.is_historical %}📖 大師斷語{% else %}🤖 AI 分析{% endif %}
+  </div>
+  {% if case.ai_analysis %}
+  <div style="line-height:1.8;white-space:pre-wrap;font-size:0.95rem;">{{ case.ai_analysis }}</div>
+  {% elif case.expert_judgment %}
+  <div style="line-height:1.8;font-size:0.95rem;">{{ case.expert_judgment }}</div>
+  {% else %}
+  <p style="color:var(--text-muted);">分析生成中，請稍後刷新頁面。</p>
+  {% endif %}
+</div>
+
+<!-- 事後反饋（歷史案例）-->
+{% if case.is_historical and case.real_feedback %}
+<div class="card" style="margin-bottom:20px;background:rgba(16,185,129,0.05);border-color:var(--success);">
+  <div class="card-title" style="color:var(--success);">✅ 事後驗證</div>
+  <p style="line-height:1.8;">{{ case.real_feedback }}</p>
+  {% if case.source %}
+  <p style="color:var(--text-muted);font-size:0.8rem;margin-top:8px;">資料來源：{{ case.source }}</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- 反饋表單（用戶案例）-->
+{% if feedback_form %}
+<div class="card" style="background:rgba(107,33,168,0.1);border-color:var(--primary);">
+  <div class="card-title">📝 提交反饋</div>
+  <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
+    請在事情有結果後，回來提交反饋，幫助系統提升準確度。
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label">驗證結果</label>
+      <select name="feedback_result" class="form-control">
+        <option value="">--- 請選擇 ---</option>
+        <option value="accurate">準確</option>
+        <option value="partial">部分準確</option>
+        <option value="inaccurate">不準確</option>
+        <option value="pending">待驗證</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">詳細說明（事後實際發生了什麼？）</label>
+      <textarea name="feedback_comment" class="form-control" rows="4"
+                placeholder="請描述事情的實際結果，例如：確實在三個月後升職了，薪資漲了25%..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">提交反饋</button>
+  </form>
+</div>
+{% elif case.feedback_submitted and not case.is_historical %}
+<div class="card" style="background:rgba(16,185,129,0.05);border-color:var(--success);">
+  <div class="card-title" style="color:var(--success);">✅ 已提交反饋</div>
+  <p>反饋結果：<strong>{{ case.get_feedback_result_display }}</strong></p>
+  {% if case.feedback_comment %}
+  <p style="margin-top:8px;color:var(--text-muted);">{{ case.feedback_comment }}</p>
+  {% endif %}
+  <p style="margin-top:8px;font-size:0.8rem;color:var(--text-muted);">反饋時間：{{ case.feedback_time|date:"Y-m-d H:i" }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

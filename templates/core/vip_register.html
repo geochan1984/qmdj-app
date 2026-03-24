@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% block title %}申請 VIP - 奇門遁甲{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:40px auto;">
+  <div class="card" style="background:linear-gradient(135deg,rgba(107,33,168,0.3),rgba(45,27,94,0.5));border-color:var(--gold);">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:3rem;margin-bottom:8px;">👑</div>
+      <h2 style="color:var(--gold);">申請 VIP 會員</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-top:8px;">限額 100 位，WhatsApp 驗證後即可享用</p>
+    </div>
+
+    <div style="background:rgba(212,175,55,0.1);border:1px solid var(--gold);border-radius:8px;padding:16px;margin-bottom:20px;">
+      <h4 style="color:var(--gold);margin-bottom:10px;">VIP 會員權益</h4>
+      <ul style="color:var(--text-muted);font-size:0.9rem;list-style:none;padding:0;">
+        <li style="padding:4px 0;">✅ 專屬 VIP 編號（001-100）</li>
+        <li style="padding:4px 0;">✅ 優先問事服務</li>
+        <li style="padding:4px 0;">✅ 詳細 AI 分析報告</li>
+        <li style="padding:4px 0;">✅ 歷史案例庫完整查閱</li>
+        <li style="padding:4px 0;">⚠️ 每次問事後需提交反饋</li>
+      </ul>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">WhatsApp 號碼 *</label>
+        <input type="text" name="whatsapp_number" class="form-control"
+               placeholder="例：+852 9123 4567" required>
+        <p class="form-hint">驗證碼將發送至此號碼（內測期間顯示在頁面上）</p>
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;">申請 VIP 資格</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

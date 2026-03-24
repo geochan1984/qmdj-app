@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}奇門遁甲問事系統{% endblock %}</title>
+<style>
+  :root {
+    --primary: #6b21a8;
+    --primary-light: #9333ea;
+    --primary-dark: #4c1d95;
+    --gold: #d4af37;
+    --gold-light: #f0d060;
+    --bg: #0f0a1e;
+    --bg2: #1a0f35;
+    --bg3: #2d1b5e;
+    --text: #e8d5f5;
+    --text-muted: #a78bca;
+    --border: #4c1d95;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Serif TC', 'Noto Serif', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { color: var(--gold-light); text-decoration: underline; }
+
+  /* Navbar */
+  .navbar {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .navbar-brand {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--gold) !important;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .navbar-nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    list-style: none;
+  }
+  .navbar-nav a {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .navbar-nav a:hover { color: var(--text); text-decoration: none; }
+  .nav-btn {
+    background: var(--primary);
+    color: white !important;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: var(--primary-light) !important; text-decoration: none !important; }
+  .nav-btn-gold {
+    background: linear-gradient(135deg, #b8860b, var(--gold));
+    color: #1a0f35 !important;
+  }
+  .nav-btn-gold:hover { background: linear-gradient(135deg, var(--gold), var(--gold-light)) !important; }
+
+  /* Container */
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Cards */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+  }
+  .btn-primary:hover { opacity: 0.9; text-decoration: none; color: white; }
+  .btn-gold {
+    background: linear-gradient(135deg, #b8860b, var(--gold));
+    color: #1a0f35;
+    font-weight: bold;
+  }
+  .btn-gold:hover { opacity: 0.9; text-decoration: none; color: #1a0f35; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-outline:hover { border-color: var(--primary-light); color: var(--text); text-decoration: none; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+
+  /* Forms */
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .form-control {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary-light);
+  }
+  select.form-control option { background: var(--bg2); }
+  .form-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* Messages */
+  .messages { margin-bottom: 16px; }
+  .message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+  .message-success { background: rgba(16,185,129,0.15); border: 1px solid var(--success); color: #6ee7b7; }
+  .message-error { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); color: #fca5a5; }
+  .message-warning { background: rgba(245,158,11,0.15); border: 1px solid var(--warning); color: #fcd34d; }
+  .message-info { background: rgba(107,33,168,0.15); border: 1px solid var(--primary); color: var(--text-muted); }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+  .badge-gold { background: rgba(212,175,55,0.2); color: var(--gold); border: 1px solid var(--gold); }
+  .badge-success { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  .badge-danger { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  .badge-warning { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .badge-muted { background: rgba(167,139,202,0.2); color: var(--text-muted); }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .navbar-nav { gap: 10px; }
+  }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* Section title */
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<nav class="navbar">
+  <a href="{% url 'index' %}" class="navbar-brand">🔮 奇門遁甲</a>
+  <ul class="navbar-nav">
+    {% if user.is_authenticated %}
+      <li><a href="{% url 'case_list' %}">案例列表</a></li>
+      <li><a href="{% url 'create_case' %}" class="nav-btn">＋ 新問事</a></li>
+      {% if user.vip_profile %}
+        <li><a href="{% url 'vip_dashboard' %}" class="nav-btn nav-btn-gold">👑 VIP</a></li>
+      {% else %}
+        <li><a href="{% url 'vip_register' %}">申請VIP</a></li>
+      {% endif %}
+      <li><a href="{% url 'logout' %}">登出 ({{ user.username }})</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}">登入</a></li>
+      <li><a href="{% url 'register' %}" class="nav-btn">免費註冊</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<div class="container">
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <div class="message message-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<footer>
+  <p>🔮 奇門遁甲問事系統 · 內測版 v1.0 · 2026</p>
+  <p style="margin-top:6px;font-size:0.75rem;">本系統僅供參考，不構成任何決策建議</p>
+</footer>
+</body>
+</html>

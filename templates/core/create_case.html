@@ -1,0 +1,169 @@
+{% extends 'core/base.html' %}
+{% block title %}新問事 - 奇門遁甲{% endblock %}
+{% block content %}
+
+<div style="max-width:700px;margin:0 auto;">
+  <h1 class="section-title">新問事</h1>
+
+  <form method="post" id="caseForm">
+    {% csrf_token %}
+
+    <!-- 基本信息 -->
+    <div class="card">
+      <div class="card-title">📋 基本信息</div>
+      <div class="form-group">
+        <label class="form-label">案例標題 *</label>
+        <input type="text" name="title" class="form-control" required
+               placeholder="例：詢問是否應該跳槽到新公司" value="{{ form.title.value|default:'' }}">
+        <p class="form-hint">簡短描述問事主題，方便日後查閱</p>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">問事類別 *</label>
+          <select name="category" class="form-control" id="categorySelect">
+            <option value="career">事業</option>
+            <option value="wealth">財運</option>
+            <option value="relationship">感情</option>
+            <option value="health">健康</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+        <div class="form-group" id="subTypeGroup">
+          <label class="form-label">細分場景</label>
+          <select name="sub_type" class="form-control">
+            <option value="">--- 請選擇 ---</option>
+            <option value="job_search">求職面試</option>
+            <option value="job_change">跳槽轉職</option>
+            <option value="promotion">升遷晉升</option>
+            <option value="layoff">裁員憂慮</option>
+            <option value="startup">創業開業</option>
+            <option value="partnership">合夥合作</option>
+            <option value="investment">投資項目</option>
+            <option value="shop_rental">租鋪選址</option>
+            <option value="bidding">項目招標</option>
+            <option value="stay_or_leave">去留問題</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">問事問題 *</label>
+        <textarea name="question" class="form-control" rows="3" required
+                  placeholder="詳細描述你的問題，例如：我目前在A公司工作，有B公司邀請我加入，薪資提升30%，請問是否應該跳槽？">{{ form.question.value|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <!-- 求測人信息 -->
+    <div class="card">
+      <div class="card-title">👤 求測人信息</div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">姓名</label>
+          <input type="text" name="name" class="form-control" placeholder="（選填）">
+        </div>
+        <div class="form-group">
+          <label class="form-label">年齡</label>
+          <input type="number" name="age" class="form-control" min="1" max="120" placeholder="（選填）">
+        </div>
+        <div class="form-group">
+          <label class="form-label">性別</label>
+          <select name="gender" class="form-control">
+            <option value="">不詳</option>
+            <option value="M">男</option>
+            <option value="F">女</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">求測人類型</label>
+        <select name="requester_type" class="form-control">
+          <option value="self">本人問</option>
+          <option value="proxy">代他人問</option>
+        </select>
+        <p class="form-hint">區分「本人問」或「代他人問」，影響分析起點宮位</p>
+      </div>
+    </div>
+
+    <!-- 事業類專用字段 -->
+    <div class="card" id="careerFields">
+      <div class="card-title">💼 事業類補充信息</div>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">
+        以下信息有助於提升分析準確度，請盡量填寫
+      </p>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">是否有直接上司</label>
+          <select name="has_supervisor" class="form-control">
+            <option value="">不適用</option>
+            <option value="True">有</option>
+            <option value="False">沒有</option>
+          </select>
+          <p class="form-hint">影響值符代表的對象</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">是否有競爭對手</label>
+          <select name="has_competitor" class="form-control">
+            <option value="">不適用</option>
+            <option value="True">有</option>
+            <option value="False">沒有</option>
+          </select>
+          <p class="form-hint">判斷是否被他人捷足先登</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">是否有資金投入</label>
+          <select name="has_investment" class="form-control">
+            <option value="">不適用</option>
+            <option value="True">有</option>
+            <option value="False">沒有</option>
+          </select>
+          <p class="form-hint">判斷財務風險與盈利預期</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 時間與地點 -->
+    <div class="card">
+      <div class="card-title">⏰ 起局時間與地點</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">起心動念時間</label>
+          <input type="datetime-local" name="manual_time" class="form-control"
+                 style="color-scheme:dark;">
+          <p class="form-hint">⚠️ 重要：請輸入<strong style="color:var(--gold);">第一次產生這個念頭</strong>的時間，而非填表時間。留空則使用當前時間。</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">所在城市 *</label>
+          <select name="city" class="form-control">
+            {% for city in cities %}
+            <option value="{{ city }}" {% if city == '香港' %}selected{% endif %}>{{ city }}</option>
+            {% endfor %}
+          </select>
+          <p class="form-hint">用於計算地方真太陽時，確保起局準確</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:flex-end;">
+      <a href="{% url 'case_list' %}" class="btn btn-outline">取消</a>
+      <button type="submit" class="btn btn-gold" style="min-width:120px;">
+        🔮 起局分析
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+// 根據類別顯示/隱藏事業類字段
+const categorySelect = document.getElementById('categorySelect');
+const careerFields = document.getElementById('careerFields');
+const subTypeGroup = document.getElementById('subTypeGroup');
+
+function updateFields() {
+  const isCareer = categorySelect.value === 'career';
+  careerFields.style.display = isCareer ? 'block' : 'none';
+  subTypeGroup.style.display = isCareer ? 'block' : 'none';
+}
+categorySelect.addEventListener('change', updateFields);
+updateFields();
+</script>
+{% endblock %}
