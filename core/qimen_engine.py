@@ -187,11 +187,23 @@ def generate_jiugong_chart(dt: datetime, city: str = '香港', use_solar_time: b
     jiuxing_pan = get_jiuxing_pan(ju_num)
     bashen_pan = get_bashen_pan(tianpeng_gong, ju_type)
     bamen_pan = BAMEN_GONG
+    # 計算日干落宮、時干落宮
+    day_tg = day_gz[0]
+    day_tg_gong = None
+    for gong, tg in dipan.items():
+        if tg == day_tg:
+            day_tg_gong = gong
+            break
+    if day_tg_gong == 5: day_tg_gong = 2
+    time_tg_gong = tianpeng_gong  # 時干落宮即天蓬宮
+
     palaces = {}
+    GONG_POSITION = {4: '西北', 9: '正北', 2: '東北', 3: '正西', 5: '中央', 7: '正東', 8: '西南', 1: '正南', 6: '東南'}
     for gong in range(1, 10):
         palaces[gong] = {
             'gong': gong,
             'gong_name': JIUGONG_NAMES[gong],
+            'position': GONG_POSITION.get(gong, ''),
             'dipan_tg': dipan.get(gong, ''),
             'tianpan_tg': tianpan.get(gong, ''),
             'men': bamen_pan.get(gong, ''),
@@ -201,6 +213,65 @@ def generate_jiugong_chart(dt: datetime, city: str = '香港', use_solar_time: b
     return {
         'ju_type': ju_type, 'ju_number': ju_num, 'palaces': palaces,
         'year_gz': year_gz, 'month_gz': month_gz, 'day_gz': day_gz, 'time_gz': time_gz,
+        'day_tg': day_tg, 'day_tg_gong': day_tg_gong,
+        'time_tg': time_tg, 'time_tg_gong': time_tg_gong,
         'solar_time': solar_dt.strftime('%Y-%m-%d %H:%M'), 'original_time': dt.strftime('%Y-%m-%d %H:%M'),
-        'city': city, 'tianpeng_gong': tianpeng_gong
+        'city': city, 'tianpeng_gong': tianpeng_gong,
+        'special_configs': [],
     }
+
+
+def get_ai_analysis(question_data: Dict, chart_data: Dict, knowledge_context: str = '') -> str:
+    """調用 AI 分析奇門遁甲盤面"""
+    try:
+        from openai import OpenAI
+        client = OpenAI()
+        palaces = chart_data.get('palaces', {})
+        palace_desc = []
+        for gong_num in [4, 9, 2, 3, 5, 7, 8, 1, 6]:
+            p = palaces.get(gong_num) or palaces.get(str(gong_num), {})
+            if p:
+                palace_desc.append(
+                    f"{p.get('gong_name', '')}宮（{p.get('position', '')}）："
+                    f"地盤{p.get('dipan_tg', '')} 天盤{p.get('tianpan_tg', '')} "
+                    f"{p.get('men', '')} {p.get('xing', '')} {p.get('shen', '')}"
+                )
+        special = chart_data.get('special_configs', [])
+        special_desc = '、'.join([s['name'] for s in special]) if special else '無特殊格局'
+        question = question_data.get('question', '') if isinstance(question_data, dict) else str(question_data)
+        category = question_data.get('category', '事業') if isinstance(question_data, dict) else '事業'
+        day_tg = chart_data.get('day_tg', chart_data.get('day_gz', '')[:1])
+        day_tg_gong = chart_data.get('day_tg_gong', '')
+        time_tg = chart_data.get('time_tg', chart_data.get('time_gz', '')[:1])
+        time_tg_gong = chart_data.get('time_tg_gong', '')
+        gong_names = {1: '坎', 2: '坤', 3: '震', 4: '巽', 5: '中', 6: '乾', 7: '兌', 8: '艮', 9: '離'}
+        day_tg_gong_name = gong_names.get(day_tg_gong, str(day_tg_gong))
+        time_tg_gong_name = gong_names.get(time_tg_gong, str(time_tg_gong))
+        prompt = f"""你是一位精通奇門遁甲的命理師，請根據以下盤面信息進行專業分析。
+【問事問題】{question}
+【問事類別】{category}
+【盤面信息】
+- 年月日時干支：{chart_data.get('year_gz', '')}年 {chart_data.get('month_gz', '')}月 {chart_data.get('day_gz', '')}日 {chart_data.get('time_gz', '')}時
+- 局型：{chart_data.get('ju_type', '')}{chart_data.get('ju_number', '')}局
+- 特殊格局：{special_desc}
+- 日干：{day_tg}（落{day_tg_gong_name}宮）
+- 時干：{time_tg}（落{time_tg_gong_name}宮）
+【九宮格局】
+{chr(10).join(palace_desc)}
+{f'【參考案例】{knowledge_context}' if knowledge_context else ''}
+請提供：
+1. **盤面解讀**：分析關鍵宮位、門、星、神的組合含義
+2. **核心判斷**：針對問題給出明確的吉凶判斷
+3. **時間預測**：預測事情發展的時間節點
+4. **建議行動**：給出具體可行的建議
+5. **人物關係**：分析相關人物的角色與影響
+請用繁體中文回答，語言專業但易懂，約400-500字。"""
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1000,
+            temperature=0.7
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"AI 分析暫時不可用（{str(e)[:50]}）。請根據盤面數據自行分析。"
