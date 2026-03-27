@@ -5,12 +5,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-qmdj-manus-test-key-2026-xk9p2m')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    h.strip() for h in os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://*.koyeb.app,https://*.onrender.com').split(',') if h.strip()
+    'https://geochan1984.pythonanywhere.com',
+    'https://*.pythonanywhere.com',
+    'https://*.koyeb.app',
+    'https://*.onrender.com',
 ]
 
 INSTALLED_APPS = [
@@ -25,7 +28,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,18 +56,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'qmdj_project.wsgi.application'
 
-# 數據庫：優先使用 DATABASE_URL（PostgreSQL），否則使用 SQLite
+# 數據庫：PythonAnywhere 使用 SQLite（持久化路徑）
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 if DATABASE_URL:
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
-    }
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+        }
+    except ImportError:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/tmp/db.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
@@ -76,14 +86,13 @@ TIME_ZONE = 'Asia/Hong_Kong'
 USE_I18N = True
 USE_TZ = True
 
-# 靜態文件（WhiteNoise 處理）
+# 靜態文件（PythonAnywhere 自行處理）
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/tmp/media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
