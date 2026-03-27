@@ -5,8 +5,9 @@
 import math
 from datetime import datetime, timedelta
 import sys
-sys.path.append('/home/ubuntu/kinqimen')
-from kinqimen import config as kinqimen_config
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import qimen_ju_name_zhirun, gangzhi
 from typing import Dict, Any, Optional
 
 # ============================================================
@@ -75,7 +76,7 @@ def get_ganzhi_month(year: int, month: int, day: int) -> str:
     return TIANGAN[tg_idx] + _MONTH_DZ_LIST[solar_month_idx]
 
 def get_ganzhi_day(year: int, month: int, day: int, hour: int, minute: int) -> str:
-    return kinqimen_config.gangzhi(year, month, day, hour, minute)[2]
+    return gangzhi(year, month, day, hour, minute)[2]
 
 def get_shichen(hour: int) -> str:
     return DIZHI[(hour + 1) // 2 % 12]
@@ -90,7 +91,7 @@ def get_shigan(year: int, month: int, day: int, hour: int, minute: int) -> str:
     return TIANGAN[time_tg_idx] + shichen
 
 def get_ju_number(year: int, month: int, day: int, hour: int, minute: int) -> Dict:
-    ju_string = kinqimen_config.qimen_ju_name_zhirun(year, month, day, hour, minute)
+    ju_string = qimen_ju_name_zhirun(year, month, day, hour, minute)
     ju_type = ju_string[0:2]
     chinese_to_int = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9}
     ju_number = chinese_to_int[ju_string[2]]
