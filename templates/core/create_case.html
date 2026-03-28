@@ -124,22 +124,58 @@
     <!-- 時間與地點 -->
     <div class="card">
       <div class="card-title">⏰ 起局時間與地點</div>
-      <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">起心動念時間</label>
-          <input type="datetime-local" name="manual_time" class="form-control"
-                 style="color-scheme:dark;">
-          <p class="form-hint">⚠️ 重要：請輸入<strong style="color:var(--gold);">第一次產生這個念頭</strong>的時間，而非填表時間。留空則使用當前時間。</p>
+
+      <!-- 起心動念時間 -->
+      <div class="form-group">
+        <label class="form-label">起心動念時間</label>
+
+        <!-- 快捷按鈕 -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" id="btnNow" onclick="setNow()">
+            ⏱ 現在時間
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="setOffset(-5)">
+            -5分鐘
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="setOffset(-15)">
+            -15分鐘
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="setOffset(-30)">
+            -30分鐘
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="clearTime()">
+            清除
+          </button>
         </div>
-        <div class="form-group">
-          <label class="form-label">所在城市 *</label>
-          <select name="city" class="form-control">
-            {% for city in cities %}
-            <option value="{{ city }}" {% if city == '香港' %}selected{% endif %}>{{ city }}</option>
-            {% endfor %}
-          </select>
-          <p class="form-hint">用於計算地方真太陽時，確保起局準確</p>
+
+        <!-- 分離式日期 + 時間輸入 -->
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="date" id="dateInput" class="form-control"
+                 style="flex:1;min-width:140px;"
+                 onchange="syncDateTime()">
+          <input type="time" id="timeInput" class="form-control"
+                 style="width:110px;"
+                 onchange="syncDateTime()">
         </div>
+
+        <!-- 隱藏的完整 datetime 字段，實際提交用 -->
+        <input type="hidden" name="manual_time" id="manualTimeHidden">
+
+        <!-- 目前已選時間顯示 -->
+        <div id="timeDisplay" style="margin-top:8px;font-size:0.85rem;color:var(--red);font-weight:500;min-height:20px;"></div>
+
+        <p class="form-hint" style="margin-top:6px;">⚠️ 重要：請輸入<strong>第一次產生這個念頭</strong>的時間。留空則使用當前時間。</p>
+      </div>
+
+      <!-- 城市 -->
+      <div class="form-group">
+        <label class="form-label">所在城市 *</label>
+        <select name="city" class="form-control">
+          {% for city in cities %}
+          <option value="{{ city }}" {% if city == '香港' %}selected{% endif %}>{{ city }}</option>
+          {% endfor %}
+        </select>
+        <p class="form-hint">用於計算地方真太陽時，確保起局準確</p>
       </div>
     </div>
 
@@ -165,5 +201,78 @@ function updateFields() {
 }
 categorySelect.addEventListener('change', updateFields);
 updateFields();
+
+// 日期時間選擇器邏輯
+const dateInput = document.getElementById('dateInput');
+const timeInput = document.getElementById('timeInput');
+const hiddenInput = document.getElementById('manualTimeHidden');
+const timeDisplay = document.getElementById('timeDisplay');
+
+// 格式化顯示時間
+function formatDisplay(dt) {
+  const y = dt.getFullYear();
+  const mo = String(dt.getMonth()+1).padStart(2,'0');
+  const d = String(dt.getDate()).padStart(2,'0');
+  const h = String(dt.getHours()).padStart(2,'0');
+  const mi = String(dt.getMinutes()).padStart(2,'0');
+  const weekdays = ['日','一','二','三','四','五','六'];
+  const wd = weekdays[dt.getDay()];
+  return `已選：${y}年${mo}月${d}日（週${wd}） ${h}:${mi}`;
+}
+
+// 同步分離輸入到隱藏字段
+function syncDateTime() {
+  const dv = dateInput.value;
+  const tv = timeInput.value;
+  if (dv && tv) {
+    hiddenInput.value = dv + 'T' + tv;
+    timeDisplay.textContent = formatDisplay(new Date(dv + 'T' + tv));
+  } else if (dv) {
+    hiddenInput.value = '';
+    timeDisplay.textContent = '請選擇時間';
+  } else {
+    hiddenInput.value = '';
+    timeDisplay.textContent = '';
+  }
+}
+
+// 設定為現在時間
+function setNow() {
+  const now = new Date();
+  setDatetime(now);
+}
+
+// 從現在時間偵移
+function setOffset(minutes) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + minutes);
+  setDatetime(now);
+}
+
+// 清除時間
+function clearTime() {
+  dateInput.value = '';
+  timeInput.value = '';
+  hiddenInput.value = '';
+  timeDisplay.textContent = '留空將使用當前時間起局';
+  timeDisplay.style.color = 'var(--text-muted)';
+}
+
+// 設定日期時間輔助函數
+function setDatetime(dt) {
+  const y = dt.getFullYear();
+  const mo = String(dt.getMonth()+1).padStart(2,'0');
+  const d = String(dt.getDate()).padStart(2,'0');
+  const h = String(dt.getHours()).padStart(2,'0');
+  const mi = String(dt.getMinutes()).padStart(2,'0');
+  dateInput.value = `${y}-${mo}-${d}`;
+  timeInput.value = `${h}:${mi}`;
+  hiddenInput.value = `${y}-${mo}-${d}T${h}:${mi}`;
+  timeDisplay.style.color = 'var(--red)';
+  timeDisplay.textContent = formatDisplay(dt);
+}
+
+// 頁面載入時預設顯示提示
+clearTime();
 </script>
 {% endblock %}

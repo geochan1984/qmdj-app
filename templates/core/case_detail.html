@@ -11,8 +11,8 @@
     margin: 0 auto;
   }
   .palace {
-    background: var(--bg3);
-    border: 1px solid var(--border);
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 12px 8px;
     text-align: center;
@@ -24,24 +24,26 @@
     transition: all 0.2s;
     position: relative;
   }
-  .palace:hover { border-color: var(--primary-light); }
+  .palace:hover { border-color: var(--red); box-shadow: 0 2px 8px rgba(232,37,26,0.1); }
   .palace.zhifu {
-    background: linear-gradient(135deg, rgba(107,33,168,0.4), rgba(45,27,94,0.6));
-    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(232,37,26,0.08), rgba(180,20,10,0.12));
+    border-color: var(--red);
+    border-width: 2px;
   }
   .palace.center {
-    background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(45,27,94,0.4));
+    background: #f0f0f0;
+    border-color: #cccccc;
   }
   .palace-gong {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: #999999;
     position: absolute;
     top: 4px;
     left: 6px;
   }
   .palace-position {
     font-size: 0.65rem;
-    color: var(--text-muted);
+    color: #999999;
     position: absolute;
     top: 4px;
     right: 6px;
@@ -49,22 +51,37 @@
   .palace-men {
     font-size: 1.1rem;
     font-weight: bold;
-    color: var(--gold);
+    color: var(--red);
   }
   .palace-xing {
     font-size: 0.85rem;
-    color: var(--primary-light);
+    color: #444444;
   }
   .palace-shen {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: #666666;
   }
   .palace-wuxing {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: #999999;
   }
-  .men-ji { color: #6ee7b7 !important; }  /* 吉門 */
-  .men-xiong { color: #fca5a5 !important; } /* 凶門 */
+  .men-ji { color: #16a34a !important; }   /* 吉門 - 綠 */
+  .men-xiong { color: #dc2626 !important; } /* 凶門 - 紅 */
+
+  /* AI Loading 動畫 */
+  .ai-spinner {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 4px solid rgba(232,37,26,0.15);
+    border-top-color: var(--red);
+    border-right-color: #888888;
+    animation: ai-spin 1s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes ai-spin {
+    to { transform: rotate(360deg); }
+  }
 
   /* 特殊格局 */
   .config-badge {
@@ -74,14 +91,14 @@
     font-size: 0.85rem;
     margin: 4px;
   }
-  .config-warning { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid var(--warning); }
-  .config-danger { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid var(--danger); }
+  .config-warning { background: rgba(217,119,6,0.1); color: #92400e; border: 1px solid #d97706; }
+  .config-danger  { background: rgba(220,38,38,0.1); color: #b91c1c; border: 1px solid #dc2626; }
 </style>
 {% endblock %}
 {% block content %}
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-  <h1 style="color:var(--gold);font-size:1.4rem;">{{ case.title }}</h1>
+  <h1 style="color:var(--text);font-size:1.4rem;font-weight:bold;">{{ case.title }}</h1>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
     {% if not case.is_historical %}
     <a href="{% url 'case_list' %}" class="btn btn-outline btn-sm">← 返回列表</a>
@@ -114,17 +131,17 @@
     <div class="card-title">📅 干支信息</div>
     {% if chart_data %}
     <table style="width:100%;font-size:0.9rem;border-collapse:collapse;">
-      <tr><td style="color:var(--text-muted);padding:4px 0;width:80px;">年干支</td><td style="color:var(--gold);">{{ chart_data.year_gz }}</td></tr>
-      <tr><td style="color:var(--text-muted);padding:4px 0;">月干支</td><td style="color:var(--gold);">{{ chart_data.month_gz }}</td></tr>
-      <tr><td style="color:var(--text-muted);padding:4px 0;">日干支</td><td style="color:var(--gold);">{{ chart_data.day_gz }}</td></tr>
-      <tr><td style="color:var(--text-muted);padding:4px 0;">時干支</td><td style="color:var(--gold);">{{ chart_data.time_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;width:80px;">年干支</td><td style="color:var(--red);font-weight:600;">{{ chart_data.year_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">月干支</td><td style="color:var(--red);font-weight:600;">{{ chart_data.month_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">日干支</td><td style="color:var(--red);font-weight:600;">{{ chart_data.day_gz }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:4px 0;">時干支</td><td style="color:var(--red);font-weight:600;">{{ chart_data.time_gz }}</td></tr>
       <tr><td style="color:var(--text-muted);padding:4px 0;">時辰</td><td>{{ chart_data.shichen }}時</td></tr>
       <tr><td style="color:var(--text-muted);padding:4px 0;">局型</td><td><span class="badge badge-gold">{{ chart_data.ju_type }} {{ chart_data.ju_number }}局</span></td></tr>
       <tr><td style="color:var(--text-muted);padding:4px 0;">日干落宮</td><td>{{ chart_data.day_tg }}（{{ chart_data.day_tg_gong }}宮）</td></tr>
       <tr><td style="color:var(--text-muted);padding:4px 0;">太陽時</td><td style="font-size:0.8rem;color:var(--text-muted);">{{ chart_data.solar_time }}</td></tr>
     </table>
     {% elif case.ganzhi %}
-    <p style="color:var(--gold);">{{ case.ganzhi }}</p>
+    <p style="color:var(--red);font-weight:600;">{{ case.ganzhi }}</p>
     {% endif %}
 
     <!-- 特殊格局 -->
@@ -158,7 +175,7 @@
       <div class="palace-xing">{{ v.xing }}</div>
       <div class="palace-shen">{{ v.shen }}</div>
       <div class="palace-wuxing">{{ v.wuxing }}</div>
-      {% if v.is_zhifu %}<div style="font-size:0.65rem;color:var(--gold);">值符</div>{% endif %}
+      {% if v.is_zhifu %}<div style="font-size:0.65rem;color:var(--red);font-weight:bold;">值符</div>{% endif %}
     </div>
     {% endif %}
     {% endfor %}
@@ -167,9 +184,9 @@
     {% endfor %}
   </div>
   <div style="margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:0.8rem;color:var(--text-muted);">
-    <span><span style="color:#6ee7b7;">■</span> 吉門（休/生/開）</span>
-    <span><span style="color:#fca5a5;">■</span> 凶門（死/驚/傷）</span>
-    <span><span style="color:var(--gold);">■</span> 值符宮位</span>
+    <span><span style="color:#16a34a;">&#9632;</span> 吉門（休/生/開）</span>
+    <span><span style="color:#dc2626;">&#9632;</span> 凶門（死/驚/傷）</span>
+    <span><span style="color:var(--red);">&#9632;</span> 值符宮位</span>
   </div>
 </div>
 {% elif case.key_config %}
@@ -180,16 +197,60 @@
 {% endif %}
 
 <!-- AI 分析 / 大師斷語 -->
-<div class="card" style="margin-bottom:20px;">
+<div class="card" style="margin-bottom:20px;" id="ai-analysis-card">
   <div class="card-title">
     {% if case.is_historical %}📖 大師斷語{% else %}🤖 AI 分析{% endif %}
   </div>
-  {% if case.ai_analysis %}
+  {% if case.is_historical %}
+    {% if case.ai_analysis %}
+    <div style="line-height:1.8;white-space:pre-wrap;font-size:0.95rem;">{{ case.ai_analysis }}</div>
+    {% elif case.expert_judgment %}
+    <div style="line-height:1.8;font-size:0.95rem;">{{ case.expert_judgment }}</div>
+    {% else %}
+    <p style="color:var(--text-muted);">暫無分析。</p>
+    {% endif %}
+  {% elif case.ai_analysis == '__ANALYZING__' %}
+  <!-- Loading 動畫 -->
+  <div id="ai-loading" style="text-align:center;padding:24px 0;">
+    <div style="display:inline-block;margin-bottom:16px;">
+      <div class="ai-spinner"></div>
+    </div>
+    <p style="color:var(--red);font-size:1rem;margin:0 0 6px;font-weight:500;">AI 正在分析盤面中…</p>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">預計等候 10–30 秒，請勿離開此頁</p>
+  </div>
+  <div id="ai-result" style="display:none;line-height:1.8;white-space:pre-wrap;font-size:0.95rem;"></div>
+  <script>
+  (function(){
+    var caseId = {{ case.id }};
+    var pollUrl = '/cases/' + caseId + '/ai-status/';
+    var maxTries = 60;
+    var tries = 0;
+    function poll(){
+      tries++;
+      fetch(pollUrl, {credentials:'same-origin'})
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if(data.status === 'done'){
+            document.getElementById('ai-loading').style.display = 'none';
+            var el = document.getElementById('ai-result');
+            el.textContent = data.content || '分析完成。';
+            el.style.display = 'block';
+          } else if(tries < maxTries){
+            setTimeout(poll, 3000);
+          } else {
+            document.getElementById('ai-loading').innerHTML =
+              '<p style="color:var(--text-muted);">AI 分析超時，請刷新頁面重試。</p>';
+          }
+        })
+        .catch(function(){ if(tries < maxTries) setTimeout(poll, 5000); });
+    }
+    setTimeout(poll, 2000);
+  })();
+  </script>
+  {% elif case.ai_analysis %}
   <div style="line-height:1.8;white-space:pre-wrap;font-size:0.95rem;">{{ case.ai_analysis }}</div>
-  {% elif case.expert_judgment %}
-  <div style="line-height:1.8;font-size:0.95rem;">{{ case.expert_judgment }}</div>
   {% else %}
-  <p style="color:var(--text-muted);">分析生成中，請稍後刷新頁面。</p>
+  <p style="color:var(--text-muted);">暫無分析。</p>
   {% endif %}
 </div>
 
@@ -206,7 +267,7 @@
 
 <!-- 反饋表單（用戶案例）-->
 {% if feedback_form %}
-<div class="card" style="background:rgba(107,33,168,0.1);border-color:var(--primary);">
+<div class="card" style="background:rgba(232,37,26,0.04);border-color:var(--border-red);">
   <div class="card-title">📝 提交反饋</div>
   <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
     請在事情有結果後，回來提交反饋，幫助系統提升準確度。

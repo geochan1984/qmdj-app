@@ -155,6 +155,7 @@ def create_case_view(request):
             except (VIPUser.DoesNotExist, AttributeError):
                 pass
 
+            # 立即建立案例，ai_analysis 標記為分析中
             case = Case.objects.create(
                 user=request.user,
                 title=title,
@@ -173,18 +174,25 @@ def create_case_view(request):
                 has_competitor=has_competitor,
                 has_investment=has_investment,
                 feedback_required=is_vip,
-                ai_analysis='',
+                ai_analysis='__ANALYZING__',
             )
 
-            try:
-                ai_result = get_ai_analysis(question_data, chart_data)
-                case.ai_analysis = ai_result
-                case.save()
-            except Exception:
-                case.ai_analysis = "AI 分析生成中，請稍後刷新頁面。"
-                case.save()
+            # 立即跳轉到案例詳情頁，AI 分析在背景執行
+            import threading
+            def run_ai_analysis(case_id, q_data, c_data):
+                try:
+                    result = get_ai_analysis(q_data, c_data)
+                    Case.objects.filter(id=case_id).update(ai_analysis=result)
+                except Exception as e:
+                    Case.objects.filter(id=case_id).update(
+                        ai_analysis=f'AI 分析暫時不可用（{str(e)[:60]}）'
+                    )
+            t = threading.Thread(target=run_ai_analysis,
+                                 args=(case.id, question_data, chart_data),
+                                 daemon=True)
+            t.start()
 
-            messages.success(request, "問事案例已創建！")
+            messages.success(request, "問事案例已建立，AI 分析進行中…")
             return redirect('case_detail', case_id=case.id)
     else:
         form = CaseCreationForm()
@@ -320,6 +328,20 @@ def vip_dashboard_view(request):
         'cannot_create_reason': reason,
     }
     return render(request, 'core/vip_dashboard.html', context)
+
+
+@login_required(login_url='/login/')
+def ai_analysis_status_view(request, case_id):
+    """API: 返回案例 AI 分析狀態（前端輪詢用）"""
+    case = get_object_or_404(Case, id=case_id)
+    if not case.is_historical and case.user != request.user:
+        return JsonResponse({'status': 'error', 'message': '無權限'}, status=403)
+
+    analyzing = case.ai_analysis == '__ANALYZING__'
+    return JsonResponse({
+        'status': 'analyzing' if analyzing else 'done',
+        'content': '' if analyzing else case.ai_analysis,
+    })
 
 
 @login_required(login_url='/login/')
